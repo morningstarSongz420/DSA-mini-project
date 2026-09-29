@@ -1,0 +1,158 @@
+import java.util.Random;
+
+public class SortingExperiment {
+
+    // Utility: generate random array
+    static int[] generateArray(int size) {
+        Random rand = new Random();
+        int[] arr = new int[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = rand.nextInt(1000); // values between 0–999
+        }
+        return arr;
+    }
+
+    // Selection Sort with comparison counter
+    static int selectionSort(int[] arr) {
+        int comparisons = 0;
+        for (int i = 0; i < arr.length - 1; i++) {
+            int minIndex = i;
+            for (int j = i + 1; j < arr.length; j++) {
+                comparisons++;
+                if (arr[j] < arr[minIndex]) {
+                    minIndex = j;
+                }
+            }
+            int temp = arr[i];
+            arr[i] = arr[minIndex];
+            arr[minIndex] = temp;
+        }
+        return comparisons;
+    }
+
+    // Insertion Sort with comparison counter
+    static int insertionSort(int[] arr) {
+        int comparisons = 0;
+        for (int i = 1; i < arr.length; i++) {
+            int key = arr[i];
+            int j = i - 1;
+            while (j >= 0) {
+                comparisons++;
+                if (arr[j] > key) {
+                    arr[j + 1] = arr[j];
+                    j--;
+                } else break;
+            }
+            arr[j + 1] = key;
+        }
+        return comparisons;
+    }
+
+    // Merge Sort with comparison counter
+    static int mergeSort(int[] arr) {
+        return mergeSortHelper(arr, 0, arr.length - 1);
+    }
+
+    static int mergeSortHelper(int[] arr, int left, int right) {
+        int comparisons = 0;
+        if (left < right) {
+            int mid = (left + right) / 2;
+            comparisons += mergeSortHelper(arr, left, mid);
+            comparisons += mergeSortHelper(arr, mid + 1, right);
+            comparisons += merge(arr, left, mid, right);
+        }
+        return comparisons;
+    }
+
+    static int merge(int[] arr, int left, int mid, int right) {
+        int comparisons = 0;
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+        int[] L = new int[n1];
+        int[] R = new int[n2];
+        for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+        for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
+
+        int i = 0, j = 0, k = left;
+        while (i < n1 && j < n2) {
+            comparisons++;
+            if (L[i] <= R[j]) arr[k++] = L[i++];
+            else arr[k++] = R[j++];
+        }
+        while (i < n1) arr[k++] = L[i++];
+        while (j < n2) arr[k++] = R[j++];
+        return comparisons;
+    }
+
+    // Quick Sort with comparison counter
+    static int quickSort(int[] arr) {
+        return quickSortHelper(arr, 0, arr.length - 1);
+    }
+
+    static int quickSortHelper(int[] arr, int low, int high) {
+        int comparisons = 0;
+        if (low < high) {
+            int[] result = partition(arr, low, high);
+            int pivotIndex = result[0];
+            comparisons += result[1];
+            comparisons += quickSortHelper(arr, low, pivotIndex - 1);
+            comparisons += quickSortHelper(arr, pivotIndex + 1, high);
+        }
+        return comparisons;
+    }
+
+    static int[] partition(int[] arr, int low, int high) {
+        int comparisons = 0;
+        int pivot = arr[high];
+        int i = low - 1;
+        for (int j = low; j < high; j++) {
+            comparisons++;
+            if (arr[j] <= pivot) {
+                i++;
+                int temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;
+            }
+        }
+        int temp = arr[i + 1]; arr[i + 1] = arr[high]; arr[high] = temp;
+        return new int[]{i + 1, comparisons};
+    }
+
+    // Run experiment
+    public static void main(String[] args) {
+        int[] sizes = {20, 50, 100, 500};
+
+        for (int size : sizes) {
+            int[] original = generateArray(size);
+
+            // Selection Sort
+            int[] arr1 = original.clone();
+            long start1 = System.nanoTime();
+            int comp1 = selectionSort(arr1);
+            long end1 = System.nanoTime();
+
+            // Insertion Sort
+            int[] arr2 = original.clone();
+            long start2 = System.nanoTime();
+            int comp2 = insertionSort(arr2);
+            long end2 = System.nanoTime();
+
+            // Merge Sort
+            int[] arr3 = original.clone();
+            long start3 = System.nanoTime();
+            int comp3 = mergeSort(arr3);
+            long end3 = System.nanoTime();
+
+            // Quick Sort
+            int[] arr4 = original.clone();
+            long start4 = System.nanoTime();
+            int comp4 = quickSort(arr4);
+            long end4 = System.nanoTime();
+
+            System.out.println("Input size: " + size);
+            System.out.println("Selection Sort: Comparisons=" + comp1 + ", Time=" + (end1 - start1));
+            System.out.println("Insertion Sort: Comparisons=" + comp2 + ", Time=" + (end2 - start2));
+            System.out.println("Merge Sort: Comparisons=" + comp3 + ", Time=" + (end3 - start3));
+            System.out.println("Quick Sort: Comparisons=" + comp4 + ", Time=" + (end4 - start4));
+            System.out.println("-----------------------------------");
+        }
+    }
+}
